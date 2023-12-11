@@ -8,20 +8,13 @@ __version__ = '.'.join(__version_info__)
 
 import bs4
 import json
-import requests
 import datetime
 import gzip
 import uuid
 import base64
 
-try:
-    from PIL import Image
-except:
-    import Image
-import pytesseract
-import requests
-
 import aiohttp
+import dateparser
 
 class DSBApi:
     def __init__(self, session: aiohttp.ClientSession, username, password, tablemapper=['class','lesson','new_subject','new_room','subject','room','text']):
@@ -51,7 +44,7 @@ class DSBApi:
             i += 1
        
 
-    async def fetch_entries(self, images=True):
+    async def fetch_entries(self):
         """
         Fetch all the DSBMobile entries
         @return: list, containing lists of DSBMobile entries from the tables or only the entries if just one table was received (default: empty list)
@@ -81,10 +74,11 @@ class DSBApi:
 
         # Send the request
         json_data = {"req": {"Data": params_compressed, "DataType": 1}}
-        timetable_data = await self.session.post(self.DATA_URL, json = json_data)
+        resp = await self.session.post(self.DATA_URL, json = json_data)
+        timetable_data = await resp.read()
 
         # Decompress response
-        data_compressed = json.loads(timetable_data.content)["d"]
+        data_compressed = json.loads(timetable_data)["d"]
         data = json.loads(gzip.decompress(base64.b64decode(data_compressed)))
 
         # validate response before proceed
@@ -106,8 +100,6 @@ class DSBApi:
         for entry in final:
             if entry.endswith(".htm") and not entry.endswith(".html") and not entry.endswith("news.htm"):
                 output.append(await self.fetch_timetable(entry))
-            elif entry.endswith(".jpg") and images == True:
-                output.append(await self.fetch_img(entry))
 
         final = []
         for entry in output:
@@ -121,29 +113,6 @@ class DSBApi:
         else:
             return output
 
-
-    async def fetch_img(self, imgurl):
-        """
-        Extract data from the image
-        @param imgurl: string, the URL to the image
-        @return: list, list of dicts
-        @todo: Future use - implement OCR
-        @raise Exception: If the function will be crawled, because the funbtion is not implemented yet
-        """
-
-        try:
-            img = Image.open(io.BytesIO(await self.session.get(imgurl)))
-        except:
-            return  #haha this is quality coding surplus
-
-        string = ""
-
-        try:
-            return  pytesseract.image_to_string(img)
-        except TesseractError:
-            raise Exception("You have to make the tesseract command accessible and work!")
-            return None
-
     async def fetch_timetable(self, timetableurl):
         """
         parse the timetableurl HTML page and return the parsed entries
@@ -151,14 +120,16 @@ class DSBApi:
         @return: list, list of dicts
         """
         results = []
-        sauce = await self.session.get(timetableurl).text
+        resp = await self.session.get(timetableurl)
+        sauce = await resp.read()
         soupi = bs4.BeautifulSoup(sauce, "html.parser")
         ind = -1
         for soup in soupi.find_all('table', {'class': 'mon_list'}):
             ind += 1
             updates = [o.p.findAll('span')[-1].next_sibling.split("Stand: ")[1] for o in soupi.findAll('table', {'class': 'mon_head'})][ind]
             titles = [o.text for o in soupi.findAll('div', {'class': 'mon_title'})][ind]
-            date = titles.split(" ")[0]
+            date_text = titles.split(" ")[0]
+            date = dateparser.parse(date_text, settings={'DATE_ORDER': 'DMY'})
             day = titles.split(" ")[1].split(", ")[0].replace(",", "")
             entries = soup.find_all("tr")
             entries.pop(0)
@@ -175,7 +146,7 @@ class DSBApi:
                     class_array = [ '---' ]
                 for class_ in class_array:
                     new_entry = dict()
-                    new_entry["date"] = date
+                    new_entry["date"] = date.astimezone().isoformat()
                     new_entry["day"]  = day
                     new_entry["updated"] = updates
                     i = 0

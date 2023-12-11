@@ -79,11 +79,8 @@ class VertretungsStatus(CoordinatorEntity, BinarySensorEntity):
         vertretung_state = []
 
         # define selecting keys
-        year = ''.join(filter(str.isdigit, self._tutor_group)) + KEY_ALLE
         selection = [
-            self._tutor_group,
-            year,
-            KEY_ALLE
+            self._tutor_group
         ]
         vertretungen = self.coordinator.data[ATTR_VERTRETUNG]
         _LOGGER.debug(f"before adding: len(vertretung_state) = {len(vertretung_state)}")

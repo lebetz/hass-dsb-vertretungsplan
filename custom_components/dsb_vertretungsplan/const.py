@@ -14,7 +14,7 @@ POLLING_INTERVAL = 300
 
 # but only in the morning between 6:00 and 15:00, format needs to be "%H:%M"
 POLLING_START = "06:00"
-POLLING_END = "15:00"
+POLLING_END = "23:55"
 
 # configuration parameters
 DEFAULT_NAME = "DSB Vertretungsplan"
