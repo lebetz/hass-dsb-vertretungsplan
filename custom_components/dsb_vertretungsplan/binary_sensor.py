@@ -1,6 +1,5 @@
 from typing import Callable, Any, Dict
 from custom_components.dsb_vertretungsplan import DSBDataUpdateCoordinator
-from hhs_vertretungsplan_parser.const import KEY_ALLE
 
 from homeassistant.components.binary_sensor import BinarySensorEntity
 from homeassistant.helpers.typing import HomeAssistantType

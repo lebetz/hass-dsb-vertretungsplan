@@ -1,4 +1,4 @@
-"""The HHS Vertretungsplan component."""
+"""The DSB Vertretungsplan component."""
 from homeassistant import config_entries
 from homeassistant.data_entry_flow import FlowResult
 
@@ -58,14 +58,13 @@ class DSBVertretungsplanConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     raise TutorGroupError
                 user_input[CONF_TUTOR_GROUP] = tutor_group.lower()
 
-                # let's try and connect to HHS
-                session = async_get_clientsession(self.hass)
+                # let's try and connect to DSB
                 user = user_input[CONF_USER]
                 password = user_input[CONF_PASS]
-                self.hhs = HHSVertretungsplanParser(session, user, password)
+                self.dsb = DSBApi(user, password)
 
                 # try to load some data
-                await self.hhs.load_data()
+                await self.dsb.fetch_entries()
 
                 # use the tutor_group as unique_id
                 unique_id = user_input[CONF_TUTOR_GROUP]

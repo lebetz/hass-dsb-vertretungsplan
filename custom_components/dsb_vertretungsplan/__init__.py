@@ -1,4 +1,4 @@
-"""The HHS Vertretungsplan component."""
+"""The DSB Vertretungsplan component."""
 from __future__ import annotations
 from typing import Dict
 from datetime import datetime, timedelta, timezone
@@ -33,7 +33,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     user = entry.data[CONF_USER]
     password = entry.data[CONF_PASS]
     dsb = DSBApi(user, password)
-    await hhs.load_data()
+    await dsb.fetch_entries()
 
     # setup a coordinator
     coordinator = DSBDataUpdateCoordinator(hass, _LOGGER, dsb, timedelta(seconds=POLLING_INTERVAL))
@@ -100,7 +100,7 @@ class DSBDataUpdateCoordinator(DataUpdateCoordinator):
             """Ask the library to reload fresh data."""
             plaene = await self.dsb.fetch_entries()
             _LOGGER.debug(f"data loaded")
-        except (ConnectionError, AuthenticationException) as error:
+        except (ConnectionError) as error:
             raise UpdateFailed(error) from error
 
         """Let's return the raw list of all Vertretungen."""
