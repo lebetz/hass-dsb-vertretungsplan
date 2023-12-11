@@ -1,5 +1,5 @@
 from typing import Callable, Any, Dict
-from custom_components.hhs_vertretungsplan import HHSDataUpdateCoordinator
+from custom_components.dsb_vertretungsplan import DSBDataUpdateCoordinator
 from hhs_vertretungsplan_parser.const import KEY_ALLE
 
 from homeassistant.components.binary_sensor import BinarySensorEntity
@@ -33,7 +33,7 @@ async def async_setup_entry(hass: HomeAssistantType, entry: ConfigEntry, async_a
 class VertretungsStatus(CoordinatorEntity, BinarySensorEntity):
     """Representation of the Vertretung."""
 
-    def __init__(self, coordinator: HHSDataUpdateCoordinator, config: ConfigEntry):
+    def __init__(self, coordinator: DSBDataUpdateCoordinator, config: ConfigEntry):
         super().__init__(coordinator)
 
         # internal

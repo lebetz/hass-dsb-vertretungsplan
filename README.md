@@ -14,15 +14,15 @@
 ### Installation:
 * Go to HACS -> Integrations
 * Click the three dots on the top right and select `Custom Repositories`
-* Enter `https://github.com/kongo09/hass-hhs-vertretungsplan` as repository, select the category `Integration` and click Add
-* A new custom integration shows up for installation (HHS Vertretungsplan) - install it
+* Enter `https://github.com/lebetz/hass-dsb-vertretungsplan` as repository, select the category `Integration` and click Add
+* A new custom integration shows up for installation (DSB Vertretungsplan) - install it
 * Restart Home Assistant
   
   
 ### Configuration:
 * Go to Configuration -> Integrations
 * Click `Add Integration`
-* Search for `HHS Vertretungsplan` and select it
+* Search for `DSB Vertretungsplan` and select it
 * Specify the tutor group (Klasse) your kid is attending
 * Add your user name and password
 * If you have more than one kid, you can repeat the process and get one sensor per kid
@@ -39,7 +39,7 @@ Provided you did the setup for tutor group ´7f´ you get the following sensor:
 
 | Entity ID                      | Type               |  Description                                                               |
 |--------------------------------|--------------------|----------------------------------------------------------------------------|
-| binary_sensor.hhs_7f           | Binary Sensor      |  Is on, if there is Vertretung today, for 7f. See attributes for details   |
+| binary_sensor.dsb_7f           | Binary Sensor      |  Is on, if there is Vertretung today, for 7f. See attributes for details   |
 
 ### Attributes:
 
@@ -76,7 +76,7 @@ cards:
   - type: entities
     entities:
       - type: custom:template-entity-row
-        entity: binary_sensor.hhs_7f
+        entity: binary_sensor.dsb_7f
         color: |-
           {% if is_state(config.entity, 'Vertretung') %}
             #FDD835
@@ -86,36 +86,30 @@ cards:
           | timestamp_custom('%-H:%M Uhr am %A') }}
   - type: conditional
     conditions:
-      - entity: binary_sensor.hhs_7f
+      - entity: binary_sensor.dsb_7f
         state: Vertretung
     card:
       type: custom:flex-table-card
       entities:
-        include: binary_sensor.hhs_7f
+        include: binary_sensor.dsb_7f
       columns:
         - data: vertretung
-          modify: >-
-            var days = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag',
-            'Freitag', 'Samstag', 'Sonntag'];
-
-            var d = new Date(x.datum).getDay();
-
-            days[d-1]
+          modify: x.day
           name: Tag
         - data: vertretung
-          modify: x.stunde
+          modify: x.lesson
           name: Stunde
         - data: vertretung
-          modify: x.fach
+          modify: x.new_subject
           name: Fach
         - data: vertretung
-          modify: x.vertreter
-          name: Vertr.
-        - data: vertretung
-          modify: x.raum
+          modify: x.new_room
           name: Raum
         - data: vertretung
-          modify: '[x.text, x.nach].filter(Boolean).join('', '')'
+          modify: x.subject
+          name: (Fach)
+        - data: vertretung
+          modify: x.text
           name: Info
 
 ```

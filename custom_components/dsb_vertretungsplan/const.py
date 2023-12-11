@@ -1,9 +1,9 @@
 """Constants for integration"""
 
-DOMAIN = "hhs_vertretungsplan"
+DOMAIN = "dsb_vertretungsplan"
 PLATFORMS = ["binary_sensor"]
 DATA_CONFIG_ENTRY = "config_entry"
-ATTRIBUTION = "Data provided by Heinrich-Hertz-Schule, Hamburg"
+ATTRIBUTION = "Data provided by DSB"
 
 CONF_TUTOR_GROUP = "tutor_group"
 CONF_USER = "user"
@@ -17,9 +17,11 @@ POLLING_START = "06:00"
 POLLING_END = "15:00"
 
 # configuration parameters
-DEFAULT_NAME = "HHS Vertretungsplan"
-PREFIX = "hhs"
+DEFAULT_NAME = "DSB Vertretungsplan"
+PREFIX = "dsb"
 
 # data keys
 ATTR_VERTRETUNG = "vertretung"
 ATTR_STATUS = "last_updated"
+
+KEY_ALLE = "-"

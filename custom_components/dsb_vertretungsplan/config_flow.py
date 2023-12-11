@@ -5,7 +5,7 @@ from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from hhs_vertretungsplan_parser.vertretungsplan_parser import HHSVertretungsplanParser, AuthenticationException
+from .dsbapi import DSBApi
 
 from aiohttp.client_exceptions import ClientConnectorError
 
@@ -21,14 +21,14 @@ _LOGGER = logging.getLogger(__name__)
 
 
 
-class HHSVertretungsplanConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Handle config flow for HHS Vertretungsplan."""
+class DSBVertretungsplanConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+    """Handle config flow for DSB Vertretungsplan."""
 
     VERSION = 1
 
     def __init__(self) -> None:
         """Initialize."""
-        self.hhs: HHSVertretungsplanParser = None
+        self.dsb: DSBApi = None
 
 
     def _get_schema(self, user_input):

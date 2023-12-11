@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 from babel.dates import format_date, format_datetime
 from dataclasses import asdict
 
-from hhs_vertretungsplan_parser.vertretungsplan_parser import AuthenticationException, HHSVertretungsplanParser
+from .dsbapi import DSBApi
 
 from .const import *
 
@@ -26,17 +26,17 @@ async def async_setup(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Setup HHS Vertretungsplan from a config entry."""
+    """Setup DSB Vertretungsplan from a config entry."""
 
     # setup the parser
     session = async_get_clientsession(hass)
     user = entry.data[CONF_USER]
     password = entry.data[CONF_PASS]
-    hhs = HHSVertretungsplanParser(session, user, password)
+    dsb = DSBApi(user, password)
     await hhs.load_data()
 
     # setup a coordinator
-    coordinator = HHSDataUpdateCoordinator(hass, _LOGGER, hhs, timedelta(seconds=POLLING_INTERVAL))
+    coordinator = DSBDataUpdateCoordinator(hass, _LOGGER, dsb, timedelta(seconds=POLLING_INTERVAL))
 
     # refresh coordinator for the first time to load initial data
     await coordinator.async_config_entry_first_refresh()
@@ -65,13 +65,13 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
     return True
 
 
-class HHSDataUpdateCoordinator(DataUpdateCoordinator):
-    """Class to manage fetching Vertretungsplan data from the HHS."""
+class DSBDataUpdateCoordinator(DataUpdateCoordinator):
+    """Class to manage fetching Vertretungsplan data from the DSB."""
 
-    def __init__(self, hass: HomeAssistant, _LOGGER, hhs: HHSVertretungsplanParser, update_interval: timedelta) -> None:
+    def __init__(self, hass: HomeAssistant, _LOGGER, dsb: DSBApi, update_interval: timedelta) -> None:
         """Initialize."""
 
-        self.hhs = hhs
+        self.dsb = dsb
         super().__init__(hass, _LOGGER, name=DOMAIN, update_interval=update_interval)
 
 
@@ -98,29 +98,30 @@ class HHSDataUpdateCoordinator(DataUpdateCoordinator):
 
         try:
             """Ask the library to reload fresh data."""
-            await self.hhs.load_data()
+            plaene = await self.dsb.fetch_entries()
             _LOGGER.debug(f"data loaded")
         except (ConnectionError, AuthenticationException) as error:
             raise UpdateFailed(error) from error
 
         """Let's return the raw list of all Vertretungen."""
         today = datetime.now().astimezone().replace(hour=0, minute=0, second=0, microsecond=0).isoformat()
-        vertretungen = self.hhs.vertretungen
         klassenliste = {}
-        for vertretung in vertretungen:
-            # skip old stuff before today
-            if vertretung.datum < today:
-                continue
-            # add to our list
-            if vertretung.klasse in klassenliste:
-                klassenliste[vertretung.klasse].append(asdict(vertretung))
-            else:
-                klassenliste[vertretung.klasse] = [asdict(vertretung)]
+        for vertretungen in plaene:
+            for vertretung in vertretungen:
+                stand = vertretung['updated']
+                # skip old stuff before today
+                if vertretung['date'] < today:
+                    continue
+                # add to our list
+                if vertretung['class'] in klassenliste:
+                    klassenliste[vertretung['class']].append(vertretung)
+                else:
+                    klassenliste[vertretung['class']] = [vertretung]
 
         """Now put it all together."""
         extra_states = {
             ATTR_VERTRETUNG: klassenliste,
-            ATTR_STATUS: self.hhs.status
+            ATTR_STATUS: stand
         }
-        _LOGGER.debug(f"Status as of {self.hhs.status}")
+        _LOGGER.debug(f"Status as of {stand}")
         return extra_states
