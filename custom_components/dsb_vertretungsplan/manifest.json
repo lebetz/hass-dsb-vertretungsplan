@@ -6,6 +6,6 @@
   "documentation": "https://github.com/lebetz/hass-dsb-vertretungsplan",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/lebetz/hass-dsb-vertretungsplan/issues",
-  "requirements": ["babel", "requests", "beautifulsoup4", "datetime", "pytesseract", "requests", "PIL"],
+  "requirements": ["babel", "requests", "beautifulsoup4", "datetime", "pytesseract", "requests", "Pillow"],
   "version": "0.1.8"
 }
