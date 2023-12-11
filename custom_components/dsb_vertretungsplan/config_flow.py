@@ -59,9 +59,10 @@ class DSBVertretungsplanConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 user_input[CONF_TUTOR_GROUP] = tutor_group.lower()
 
                 # let's try and connect to DSB
+                session = async_get_clientsession(self.hass)
                 user = user_input[CONF_USER]
                 password = user_input[CONF_PASS]
-                self.dsb = DSBApi(user, password)
+                self.dsb = DSBApi(session, user, password)
 
                 # try to load some data
                 await self.dsb.fetch_entries()

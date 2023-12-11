@@ -32,7 +32,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     session = async_get_clientsession(hass)
     user = entry.data[CONF_USER]
     password = entry.data[CONF_PASS]
-    dsb = DSBApi(user, password)
+    dsb = DSBApi(session, user, password)
     await dsb.fetch_entries()
 
     # setup a coordinator

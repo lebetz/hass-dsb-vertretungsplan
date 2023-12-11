@@ -21,8 +21,10 @@ except:
 import pytesseract
 import requests
 
+import aiohttp
+
 class DSBApi:
-    def __init__(self, username, password, tablemapper=['class','lesson','new_subject','new_room','subject','room','text']):
+    def __init__(self, session: aiohttp.ClientSession, username, password, tablemapper=['class','lesson','new_subject','new_room','subject','room','text']):
         """
         Class constructor for class DSBApi
         @param username: string, the username of the DSBMobile account
@@ -31,6 +33,7 @@ class DSBApi:
         @return: class
         @raise TypeError: If the attribute tablemapper is not of type list
         """
+        self.session = session
         self.DATA_URL = "https://app.dsbcontrol.de/JsonHandler.ashx/GetData"
         self.username = username
         self.password = password
@@ -78,7 +81,7 @@ class DSBApi:
 
         # Send the request
         json_data = {"req": {"Data": params_compressed, "DataType": 1}}
-        timetable_data = await requests.post(self.DATA_URL, json = json_data)
+        timetable_data = await self.session.post(self.DATA_URL, json = json_data)
 
         # Decompress response
         data_compressed = json.loads(timetable_data.content)["d"]
@@ -129,7 +132,7 @@ class DSBApi:
         """
 
         try:
-            img = Image.open(io.BytesIO(await requests.get(imgurl)))
+            img = Image.open(io.BytesIO(await self.session.get(imgurl)))
         except:
             return  #haha this is quality coding surplus
 
@@ -148,7 +151,7 @@ class DSBApi:
         @return: list, list of dicts
         """
         results = []
-        sauce = await requests.get(timetableurl).text
+        sauce = await self.session.get(timetableurl).text
         soupi = bs4.BeautifulSoup(sauce, "html.parser")
         ind = -1
         for soup in soupi.find_all('table', {'class': 'mon_list'}):
