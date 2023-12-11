@@ -80,7 +80,7 @@ class DSBVertretungsplanConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     data=user_input
                 )
 
-            except (ConnectionError, ClientConnectorError, AuthenticationException) as e:
+            except (ConnectionError, ClientConnectorError) as e:
                 errors['base'] = "authentication"
             except TutorGroupError:
                 errors[CONF_TUTOR_GROUP] = "tutor_group"
