@@ -8,5 +8,5 @@
   "issue_tracker": "https://github.com/lebetz/hass-dsb-vertretungsplan/issues",
   "requirements": ["babel", "beautifulsoup4", "datetime", "python-dateutil"],
   "loggers": ["custom_components.dsb_vertretungsplan"],
-  "version": "0.1.9"
+  "version": "0.2.0"
 }
