@@ -14,7 +14,7 @@ import uuid
 import base64
 
 import aiohttp
-import dateparser
+import dateutil
 
 class DSBApi:
     def __init__(self, session: aiohttp.ClientSession, username, password, tablemapper=['class','lesson','new_subject','new_room','subject','room','text']):
@@ -129,7 +129,7 @@ class DSBApi:
             updates = [o.p.findAll('span')[-1].next_sibling.split("Stand: ")[1] for o in soupi.findAll('table', {'class': 'mon_head'})][ind]
             titles = [o.text for o in soupi.findAll('div', {'class': 'mon_title'})][ind]
             date_text = titles.split(" ")[0]
-            date = dateparser.parse(date_text, settings={'DATE_ORDER': 'DMY'})
+            date = dateutil.parser.parse(date_text, dayfirst=True)
             day = titles.split(" ")[1].split(", ")[0].replace(",", "")
             entries = soup.find_all("tr")
             entries.pop(0)
