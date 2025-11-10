@@ -53,7 +53,7 @@ class DSBVertretungsplanConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 tutor_group = user_input[CONF_TUTOR_GROUP]
                 if tutor_group == None:
                     raise TutorGroupError
-                tutor_group = re.sub('\s', '', tutor_group)
+                tutor_group = re.sub('\\s', '', tutor_group)
                 if len(tutor_group) == 0:
                     raise TutorGroupError
                 user_input[CONF_TUTOR_GROUP] = tutor_group
